@@ -10,8 +10,9 @@ def _multi_replace(olds, news, string):
   return string
 
 def tokenize(token_types, string):
-  unsorted_tokens = []
+  tokens = []
   for token in token_types:
+    unparsed_tokens = []
     # Generate token regex
     if token.has_params is True:
       if token.has_closing_token is False:
@@ -27,8 +28,12 @@ def tokenize(token_types, string):
         break
       code_regex = r"\[code\][^(\[/code\])]*?" + _multi_replace(list(".^$*+?{}[]\\|()"), ["\\" + x for x in list(".^$*+?{}[]\|()")], token_string)
       if re.search(code_regex, string) is None:
-        unsorted_tokens.append(token_occurences)
-  return unsorted_tokens
+        unparsed_tokens.append(token_string)
+      # Change token class
+      for x in unparsed_tokens:
+        parsed_token = ParsedToken(token.name, x)
+        tokens.append(parsed_token)
+  return tokens
 
 def parse(replace_functions, parsed_tokens, string):
   for token in parsed_tokens:
