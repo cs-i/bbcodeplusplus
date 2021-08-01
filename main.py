@@ -41,3 +41,9 @@ def parse(replace_functions, parsed_tokens, string):
     replaced_string = replace_function(token.input_string)
     string = string.replace(token.input_string, replaced_string)
   return string
+
+
+class Parser:
+  def __init__(self):
+    self.tokens = []
+    self.token_functions = {}
