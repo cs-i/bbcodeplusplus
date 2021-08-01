@@ -9,7 +9,7 @@ def _multi_replace(olds, news, string):
     string = string.replace(old, new)
   return string
 
-def tokenize(token_types, string):
+def _tokenize(token_types, string):
   tokens = []
   for token in token_types:
     unparsed_tokens = []
@@ -35,7 +35,7 @@ def tokenize(token_types, string):
         tokens.append(parsed_token)
   return tokens
 
-def parse(replace_functions, parsed_tokens, string):
+def _parse_tokens(replace_functions, parsed_tokens, string):
   for token in parsed_tokens:
     replace_function = replace_functions[token.name]
     replaced_string = replace_function(token.input_string)
@@ -47,3 +47,17 @@ class Parser:
   def __init__(self):
     self.tokens = []
     self.token_functions = {}
+    self.pre_replacer = lambda x: _multi_replace(['<', '>'], ['&lt', '&gt'], x)
+  
+  def add_token(self, name, has_params, has_closing_token, token_function):
+    token = Token(name, has_params, has_closing_token)
+    self.tokens.append(token)
+    self.token_functions.append(token_function)
+  
+  def translate(self, bbcode_string):
+    """translate(self: Parser, bbcode_string: str)
+    Translates a BBCode++ string into raw HTML."""
+    sanitized_string = self.pre_replacer(bbcode_string)
+    tokens = _tokenize(self.tokens, sanitized_string)
+    output_string = _parse_tokens(self.token_functions, tokens, sanitized_string)
+    return output_string
