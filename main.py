@@ -21,11 +21,18 @@ def tokenize(token_types, string):
     else:
       token_regex = r"\[" + token.name + r"\][^(\[/" + token.name + r"\])]*\[/" + token.name + r"\]"
     token_occurences = re.findall(token_regex, string)
+    # Remove occurences between code tags
     for pos, token_string in enumerate(token_occurences):
       if token.name == 'code':
         break
       code_regex = r"\[code\][^(\[/code\])]*?" + _multi_replace(list(".^$*+?{}[]\\|()"), ["\\" + x for x in list(".^$*+?{}[]\|()")], token_string)
       if re.search(code_regex, string) is None:
         unsorted_tokens.append(token_occurences)
-  sorted_tokens = sorted(unsorted_tokens, lambda x: string.find(x))
-  return sorted_tokens
+  return unsorted_tokens
+
+def parse(replace_functions, parsed_tokens, string):
+  for token in parsed_tokens:
+    replace_function = replace_functions[token.name]
+    replaced_string = replace_function(token.input_string)
+    string = string.replace(token.input_string, replaced_string)
+  return string
